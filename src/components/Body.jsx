@@ -7,6 +7,7 @@ import { addResume } from "../utils/resumeSlice";
 import axios from "axios";
 import NavBar from "./NavBar";
 import { Skeleton } from "@heroui/react";
+import { motion } from "framer-motion";
 const Body = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -78,10 +79,17 @@ const Body = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <NavBar />
-      <main className="flex-1 pb-20">
-        <Outlet />
-      </main>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.98 }}
+        transition={{ duration: 0.3 }}
+      >
+        <NavBar />
+        <main className="flex-1 pb-20">
+          <Outlet />
+        </main>
+      </motion.div>
     </div>
   );
 };
