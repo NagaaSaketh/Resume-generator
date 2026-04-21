@@ -11,9 +11,12 @@ const ResumeLayout = ({ resume }) => {
     });
 
   return (
-    <div className="bg-white max-w-3xl mx-auto p-8 shadow-lg">
+    <div
+      className="bg-white max-w-200 mx-auto p-5 shadow-2xl"
+      style={{ fontSize: "12px", lineHeight: "1.4" }}
+    >
       {/* HEADER */}
-      <h1 className="text-center font-bold text-xl">
+      <h1 className="text-center font-bold text-lg">
         {resume.userId?.firstName} {resume.userId?.lastName},{" "}
         <span className="font-medium">{resume.title}</span>
       </h1>
@@ -23,10 +26,10 @@ const ResumeLayout = ({ resume }) => {
         {resume.userId?.emailId}
       </p>
 
-      <hr className="my-5" />
+      <div style={{ borderTop: "1px solid #e5e7eb", margin: "10px 0" }} />
 
       {/* LINKS */}
-      <section className="flex gap-6">
+      <section className="flex items-start gap-5">
         <h2 className="w-32 text-sm tracking-widest font-semibold">LINKS</h2>
 
         <div className="flex-1 text-sm flex gap-4">
@@ -65,35 +68,36 @@ const ResumeLayout = ({ resume }) => {
         </div>
       </section>
 
-      <hr className="my-5" />
+      <div style={{ borderTop: "1px solid #e5e7eb", margin: "10px 0" }} />
 
       {/* PROFILE */}
-      <section className="flex gap-6">
+      <section className="flex items-start gap-5">
         <h2 className="w-32 text-sm tracking-widest font-semibold">PROFILE</h2>
 
         <p className="flex-1 text-sm">{resume.description}</p>
       </section>
 
-      <hr className="my-5" />
+      <div style={{ borderTop: "1px solid #e5e7eb", margin: "10px 0" }} />
 
       {/* PROJECTS */}
-      <section className="flex gap-6">
-        <h2 className="w-32 text-sm tracking-widest font-semibold">PROJECTS</h2>
+      <section className="flex items-start gap-5">
+        <h2 className="w-32 text-sm font-semibold tracking-widest">PROJECTS</h2>
 
-        <div className="flex-1 space-y-6">
+        <div className="flex-1 space-y-4">
           {resume.projects?.map((proj, i) => (
-            <div key={i} className="flex gap-6">
-              {/* LEFT: DATE */}
-
-              {/* RIGHT */}
+            <div key={i}>
               <div className="flex-1">
-                <h3 className="font-semibold">{proj.title}</h3>
-
-                <div style={{ color: "#6b7280" }} className="text-sm">
-                  {formatDate(proj.startDate)} - {formatDate(proj.endDate)}
+                <div
+                  className="flex justify-between"
+                  style={{ alignItems: "baseline" }}
+                >
+                  <h3 className="text-sm font-semibold">{proj.title}</h3>
+                  <div style={{ fontSize: "13px", color: "#666" }}>
+                    {formatDate(proj.startDate)} - {formatDate(proj.endDate)}
+                  </div>
                 </div>
 
-                <div className="text-sm text-blue-500 space-x-3">
+                <div style={{ color: "#3b82f6" }} className="text-sm space-x-3">
                   <a href={proj.demoLink} target="_blank" rel="noreferrer">
                     Demo
                   </a>
@@ -102,14 +106,14 @@ const ResumeLayout = ({ resume }) => {
                   </a>
                 </div>
 
-                <ul className="text-sm mt-1 list-disc ml-5">
+                <ul className="text-sm mt-1 space-y-1 list-disc ml-4">
                   {proj.description?.map((point, index) => (
                     <li key={index}>{point}</li>
                   ))}
                 </ul>
 
-                <p style={{ color: "#6b7280" }} className="text-sm mt-1">
-                  <span className="font-medium">Tech:</span>{" "}
+                <p style={{ color: "#6b7280" }} className="text-sm mt-2">
+                  <span className="font-bold">Tech:</span>{" "}
                   {proj.techStack?.join(", ")}
                 </p>
               </div>
@@ -118,10 +122,10 @@ const ResumeLayout = ({ resume }) => {
         </div>
       </section>
 
-      <hr className="my-5" />
+      <div style={{ borderTop: "1px solid #e5e7eb", margin: "10px 0" }} />
 
       {/* EDUCATION */}
-      <section className="flex gap-6">
+      <section className="flex items-start gap-5">
         <h2 className="w-32 text-sm tracking-widest font-semibold">
           EDUCATION
         </h2>
@@ -129,57 +133,74 @@ const ResumeLayout = ({ resume }) => {
         <div className="flex-1 text-sm space-y-3">
           {resume.education?.map((e, i) => (
             <div key={i}>
-              <p className="font-medium">
-                {e.degree}, {e.institute}
-              </p>
-
-              {/* DATE BELOW TITLE */}
-              <p style={{ color: "#6b7280" }}>
-                {new Date(e.startDate).getFullYear()} -{" "}
-                {new Date(e.endDate).getFullYear()}
-              </p>
-
-              <p>{e.fieldOfStudy}</p>
-              <p>CGPA - {e.grade}</p>
-              <p>{e.place}</p>
+              <div className="flex items-center justify-between">
+                <p className="font-bold">
+                  {e.degree}, {e.institute}
+                </p>
+                <div style={{ textAlign: "right" }}>
+                  <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
+                    {new Date(e.startDate).getFullYear()} -{" "}
+                    {new Date(e.endDate).getFullYear()}
+                  </p>
+                  <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
+                    {e.place}
+                  </p>
+                </div>
+              </div>
+              <div className="pt-0 mt-0">
+                <p>{e.fieldOfStudy}</p>
+                <p>CGPA - {e.grade}</p>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      <hr className="my-5" />
+      <div style={{ borderTop: "1px solid #e5e7eb", margin: "10px 0" }} />
 
       {/* SKILLS */}
-      <section className="flex gap-6">
+      <section className="flex items-start gap-5">
         <h2 className="w-32 text-sm tracking-widest font-semibold">SKILLS</h2>
 
-        <p className="flex-1 text-sm">{resume.skills?.join(", ")}</p>
+        <div className="flex flex-wrap gap-2">
+          {resume.skills?.map((skill, i) => (
+            <span key={i} className="text-xs px-2 py-1">
+              {skill}
+            </span>
+          ))}
+        </div>
       </section>
 
-      <hr className="my-5" />
+      <div style={{ borderTop: "1px solid #e5e7eb", margin: "10px 0" }} />
 
-      <section className="flex gap-6">
+      <section className="flex items-start gap-5">
         <h2 className="w-32 text-sm tracking-widest font-semibold">
           LANGUAGES
         </h2>
 
         <div className="flex-1 text-sm">
-          {resume.languages?.map((l) => l.name).join(", ")}
+          {resume.languages?.map((lang, i) => (
+            <span key={i} className="text-xs px-2 py-1">
+              {lang.name}
+            </span>
+          ))}
         </div>
       </section>
 
       {/* CERTIFICATIONS */}
       {resume.certifications?.length > 0 && (
         <>
-          <hr className="my-5" />
-          <section className="flex gap-6">
+          <div style={{ borderTop: "1px solid #e5e7eb", margin: "10px 0" }} />
+          <section className="flex items-start gap-5">
             <h2 className="w-32 text-sm tracking-widest font-semibold">
               CERTIFICATIONS
             </h2>
 
-            <ul className="flex-1 text-sm list-disc ml-5">
+            <ul className="text-sm list-disc ml-5 space-y-1">
               {resume.certifications.map((cert, i) => (
-                <li style={{listStyle:"none"}}  key={i}>{cert}</li>
+                <li style={{ listStyle: "none" }} key={i}>
+                  {cert}
+                </li>
               ))}
             </ul>
           </section>

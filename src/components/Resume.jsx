@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../utils/constants";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import ResumePDF from "../components/ResumePDF";
+import { useRef } from "react";
+import html2pdf from "html2pdf.js";
 import ResumeLayout from "./ResumeLayout";
 import { ArrowDownToSquare, TrashBin, CircleInfo } from "@gravity-ui/icons";
 import { Button, Modal } from "@heroui/react";
@@ -11,6 +11,7 @@ import { Button, Modal } from "@heroui/react";
 const Resume = () => {
   const { id } = useParams();
   const [resume, setResume] = useState(null);
+  const resumeRef = useRef();
 
   const resumeDetails = async () => {
     try {
@@ -27,25 +28,30 @@ const Resume = () => {
     resumeDetails();
   }, [id]);
 
+  const downloadPDF = () => {
+    document.body.classList.add("pdf-safe");
+
+    html2pdf()
+      .set({
+        margin: 5,
+        filename: "resume.pdf",
+        html2canvas: { scale: 4, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .from(resumeRef.current)
+      .save()
+      .then(() => {
+        document.body.classList.remove("pdf-safe");
+      });
+  };
+
   return (
-    <div className="bg-gray-200 min-h-screen py-10">
+    <div style={{ backgroundColor: "#e5e7eb" }} className="min-h-screen py-10">
       <div className="flex items-center justify-center mb-4 gap-4">
         {resume && (
-          <PDFDownloadLink
-            document={<ResumePDF resume={resume} />}
-            fileName="resume.pdf"
-          >
-            {({ loading }) =>
-              loading ? (
-                "Preparing PDF..."
-              ) : (
-                <Button variant="primary">
-                  <ArrowDownToSquare className="w-4 h-4" />{" "}
-                  <span>Download PDF</span>
-                </Button>
-              )
-            }
-          </PDFDownloadLink>
+          <Button variant="primary" onClick={downloadPDF}>
+            <ArrowDownToSquare /> Download PDF
+          </Button>
         )}
 
         <Modal>
@@ -94,7 +100,15 @@ const Resume = () => {
       </div>
 
       {resume ? (
-        <ResumeLayout resume={resume} />
+        <div
+          ref={resumeRef}
+          style={{
+            backgroundColor: "#ffffff",
+            color: "#000000",
+          }}
+        >
+          <ResumeLayout resume={resume} />
+        </div>
       ) : (
         <div className="text-center text-gray-500">Loading...</div>
       )}
