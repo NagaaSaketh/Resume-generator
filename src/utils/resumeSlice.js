@@ -2,13 +2,13 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const resumeSlice = createSlice({
   name: "resume",
-  initialState: null,
+  initialState: [],
   reducers: {
     addResume: (state, action) => {
-      return action.payload;
+      return action.payload
     },
     removeResume: (state, action) => {
-      return null;
+      return state.filter((resume) => resume._id !== action.payload);
     },
   },
 });

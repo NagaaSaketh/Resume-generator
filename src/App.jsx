@@ -9,6 +9,7 @@ import Login from "./components/Login";
 import Body from "./components/Body";
 import ResumeForm from "./components/ResumeForm";
 import SavedResumes from "./components/SavedResumes";
+import Resume from "./components/Resume";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -20,6 +21,7 @@ function AnimatedRoutes() {
         <Route path="/" element={<Body />}>
           <Route index element={<ResumeForm />} />
           <Route path="resumes" element={<SavedResumes />} />
+          <Route path="resumes/:id" element={<Resume/>}/>
         </Route>
       </Routes>
     </AnimatePresence>
