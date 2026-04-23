@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../utils/constants";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { useRef } from "react";
 import html2pdf from "html2pdf.js";
 import ResumeLayout from "./ResumeLayout";
 import { ArrowDownToSquare, TrashBin, CircleInfo } from "@gravity-ui/icons";
 import { Button, Modal } from "@heroui/react";
+import toast from "react-hot-toast";
 
 const Resume = () => {
   const { id } = useParams();
   const [resume, setResume] = useState(null);
   const resumeRef = useRef();
+  const navigate = useNavigate();
 
   const resumeDetails = async () => {
     try {
@@ -27,6 +29,20 @@ const Resume = () => {
   useEffect(() => {
     resumeDetails();
   }, [id]);
+
+  const handleDeleteResume = async () => {
+    try {
+      const response = await axios.delete(`${BASE_URL}/resumes/${id}`, {
+        withCredentials: true,
+      });
+      setResume(null);
+      toast.success("Resume deleted!");
+      navigate("/resumes")
+    } catch (err) {
+      console.log(err);
+      toast.error("Something went wrong!");
+    }
+  };
 
   const downloadPDF = () => {
     document.body.classList.add("pdf-safe");
@@ -84,12 +100,7 @@ const Resume = () => {
                     Cancel
                   </Button>
 
-                  <Button
-                    variant="danger"
-                    onClick={() => {
-                      console.log("delete api");
-                    }}
-                  >
+                  <Button variant="danger" onClick={handleDeleteResume}>
                     Delete
                   </Button>
                 </Modal.Footer>
@@ -107,7 +118,7 @@ const Resume = () => {
             color: "#000000",
           }}
         >
-          <ResumeLayout resume={resume} />
+          <ResumeLayout resume={resume} mode="final" />
         </div>
       ) : (
         <div className="text-center text-gray-500">Loading...</div>
