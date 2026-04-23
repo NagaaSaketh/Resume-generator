@@ -215,7 +215,11 @@ const ResumeForm = () => {
         techStack: p.techStack ? p.techStack.split(",") : [],
       })),
 
-      experience: experience,
+      experience: experience.map((exp) => ({
+        ...exp,
+        description: exp.description ? exp.description.split("\n") : [],
+        techStack: exp.techStack ? exp.techStack.split(",") : [],
+      })),
 
       skills: skills ? skills.split(",") : [],
 
@@ -1070,7 +1074,7 @@ const ResumeForm = () => {
                                   />
                                 </TextField>
 
-                                <TextField isRequired>
+                                {/* <TextField isRequired>
                                   <Label className="mt-3">Place</Label>
                                   <Input
                                     value={exp.location}
@@ -1083,7 +1087,7 @@ const ResumeForm = () => {
                                     }
                                     className="mt-3"
                                   />
-                                </TextField>
+                                </TextField> */}
 
                                 {index === experience.length - 1 && (
                                   <div className="flex justify-end mt-4 gap-3">
@@ -1139,7 +1143,6 @@ const ResumeForm = () => {
                       ></TextArea>
                     </TextField>
                   </div>
-                  
                 </FieldGroup>
                 <Fieldset.Actions>
                   <Button type="submit">

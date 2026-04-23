@@ -10,6 +10,22 @@ const ResumeLayout = ({ resume, mode = "final" }) => {
       year: "numeric",
     });
 
+  const hasExperience = resume.experience?.some(
+    (exp) =>
+      exp.company?.trim() ||
+      exp.role?.trim() ||
+      (exp.description && exp.description.length > 0),
+  );
+
+  const hasProjects = resume.projects?.some(
+    (p) =>
+      p.title?.trim() ||
+      (p.description && p.description.length > 0) ||
+      (p.techStack && p.techStack.length > 0) ||
+      p.githubLink?.trim() ||
+      p.demoLink?.trim(),
+  );
+
   return (
     <div
       className="bg-white max-w-200 mx-auto p-5 shadow-2xl"
@@ -116,17 +132,50 @@ const ResumeLayout = ({ resume, mode = "final" }) => {
         </>
       )}
 
-      {(mode === "final" ||
-        resume.projects?.some(
-          (p) =>
-            p.title?.trim() ||
-            (p.description && p.description.length > 0) ||
-            (p.techStack && p.techStack.length > 0) ||
-            p.githubLink?.trim() ||
-            p.demoLink?.trim(),
-        )) && (
+      {(mode === "final" || hasExperience) && hasExperience && (
         <>
-          {/* PROJECTS */}
+          <section className="flex items-start gap-5">
+            <h2 className="w-32 text-sm font-semibold tracking-widest">
+              EXPERIENCE
+            </h2>
+
+            <div className="flex-1 space-y-4">
+              {resume.experience?.map((exp, i) => (
+                <div key={i}>
+                  <div className="flex justify-between">
+                    <h3 className="text-sm font-semibold">
+                      {exp.role} {exp.company && `@ ${exp.company}`}
+                    </h3>
+
+                    {exp.startDate && exp.endDate && (
+                      <span className="text-xs text-gray-500">
+                        {formatDate(exp.startDate)} - {formatDate(exp.endDate)}
+                      </span>
+                    )}
+                  </div>
+
+                  <ul className="text-sm mt-1 space-y-1 list-disc ml-4">
+                    {exp.description?.map((point, index) => (
+                      <li key={index}>{point}</li>
+                    ))}
+                  </ul>
+
+                  {exp.techStack?.length > 0 && (
+                    <p className="text-sm mt-2 text-gray-500">
+                      <span className="font-bold">Tech:</span>{" "}
+                      {exp.techStack.join(", ")}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <div style={{ borderTop: "1px solid #e5e7eb", margin: "10px 0" }} />
+        </>
+      )}
+      {!hasExperience && (mode === "final" || hasProjects) && hasProjects && (
+        <>
           <section className="flex items-start gap-5">
             <h2 className="w-32 text-sm font-semibold tracking-widest">
               PROJECTS
@@ -186,6 +235,7 @@ const ResumeLayout = ({ resume, mode = "final" }) => {
           <div style={{ borderTop: "1px solid #e5e7eb", margin: "10px 0" }} />
         </>
       )}
+
       {(mode === "final" ||
         resume.education?.some(
           (e) =>
