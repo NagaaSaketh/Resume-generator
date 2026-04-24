@@ -3,7 +3,7 @@ import React from "react";
 const ResumeLayout = ({ resume, mode = "final" }) => {
   if (!resume) return null;
 
-  console.log(resume);
+  // console.log(resume);
   const formatDate = (date) =>
     new Date(date).toLocaleString("default", {
       month: "short",
@@ -160,12 +160,7 @@ const ResumeLayout = ({ resume, mode = "final" }) => {
                     ))}
                   </ul>
 
-                  {exp.techStack?.length > 0 && (
-                    <p className="text-sm mt-2 text-gray-500">
-                      <span className="font-bold">Tech:</span>{" "}
-                      {exp.techStack.join(", ")}
-                    </p>
-                  )}
+                  
                 </div>
               ))}
             </div>
@@ -320,7 +315,7 @@ const ResumeLayout = ({ resume, mode = "final" }) => {
             <div className="flex-1 text-sm">
               {resume.languages?.map((lang, i) => (
                 <span key={i} className="text-xs px-2 py-1">
-                  {lang.name}
+                  {lang}
                 </span>
               ))}
             </div>

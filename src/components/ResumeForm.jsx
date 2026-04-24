@@ -6,6 +6,7 @@ import {
   LogoLinkedin,
   Plus,
   TrashBin,
+  Eraser,
 } from "@gravity-ui/icons";
 import {
   Card,
@@ -28,7 +29,13 @@ import ResumeLayout from "./ResumeLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import Menu from "./Menu";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { usePersistedState } from "../utils/usePersistedState";
+import { addResume } from "../utils/resumeSlice";
+import { BASE_URL } from "../utils/constants";
+import { parseDate } from "@internationalized/date";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const fadeSlide = {
   hidden: { opacity: 0, y: 20 },
@@ -37,14 +44,15 @@ const fadeSlide = {
 
 const ResumeForm = () => {
   const user = useSelector((store) => store.user);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [phone, setPhone] = useState("");
-  const [github, setGithub] = useState("");
-  const [linkedin, setLinkedin] = useState("");
-  const [portfolio, setPortfolio] = useState("");
-  const [address, setAddress] = useState("");
-  const [education, setEducation] = useState([
+  const dispatch = useDispatch();
+  const [title, setTitle] = usePersistedState("rf_title", "");
+  const [description, setDescription] = usePersistedState("rf_description", "");
+  const [phone, setPhone] = usePersistedState("rf_phone", "");
+  const [github, setGithub] = usePersistedState("rf_github", "");
+  const [linkedin, setLinkedin] = usePersistedState("rf_linkedin", "");
+  const [portfolio, setPortfolio] = usePersistedState("rf_portfolio", "");
+  const [address, setAddress] = usePersistedState("rf_address", "");
+  const [education, setEducation] = usePersistedState("rf_education", [
     {
       institute: "",
       degree: "",
@@ -56,31 +64,36 @@ const ResumeForm = () => {
     },
   ]);
 
-  const [projects, setProjects] = useState([
-    {
-      title: "",
-      description: "",
-      techStack: "",
-      githubLink: "",
-      demoLink: "",
-    },
+  const [projects, setProjects] = usePersistedState("rf_projects", [
+    { title: "", description: "", techStack: "", githubLink: "", demoLink: "" },
   ]);
-  const [showProjects, setShowProjects] = useState(false);
-  const [experience, setExperience] = useState([
+
+  const [experience, setExperience] = usePersistedState("rf_experience", [
     {
       company: "",
       role: "",
       description: "",
-      techStack: "",
       startDate: "",
       endDate: "",
       location: "",
     },
   ]);
-  const [showExperience, setShowExperience] = useState(false);
-  const [skills, setSkills] = useState("");
-  const [certifications, setCertifications] = useState("");
-  const [languages, setLanguages] = useState("");
+
+  const [skills, setSkills] = usePersistedState("rf_skills", "");
+  const [certifications, setCertifications] = usePersistedState(
+    "rf_certifications",
+    "",
+  );
+  const [languages, setLanguages] = usePersistedState("rf_languages", "");
+
+  const [showProjects, setShowProjects] = usePersistedState(
+    "rf_showProjects",
+    false,
+  );
+  const [showExperience, setShowExperience] = usePersistedState(
+    "rf_showExperience",
+    false,
+  );
 
   const handleEducationChange = (index, field, value) => {
     const updated = [...education];
@@ -165,7 +178,6 @@ const ResumeForm = () => {
           company: "",
           role: "",
           description: "",
-          techStack: "",
           startDate: "",
           endDate: "",
           location: "",
@@ -178,7 +190,6 @@ const ResumeForm = () => {
           company: "",
           role: "",
           description: "",
-          techStack: "",
           startDate: "",
           endDate: "",
           location: "",
@@ -192,13 +203,6 @@ const ResumeForm = () => {
     return {
       title,
       description,
-
-      userId: {
-        firstName: `${user.firstName}`,
-        lastName: `${user.lastName}`,
-        emailId: `${user.emailId}`,
-      },
-
       personalInfo: {
         phone,
         address,
@@ -218,17 +222,50 @@ const ResumeForm = () => {
       experience: experience.map((exp) => ({
         ...exp,
         description: exp.description ? exp.description.split("\n") : [],
-        techStack: exp.techStack ? exp.techStack.split(",") : [],
       })),
 
       skills: skills ? skills.split(",") : [],
 
-      languages: languages
-        ? languages.split(",").map((l) => ({ name: l.trim() }))
-        : [],
+      languages: languages ? languages.split(",").map((l) => l.trim()) : [],
 
       certifications: certifications ? certifications.split(",") : [],
     };
+  };
+
+  const transformToResumePreview = () => {
+    return {
+      ...transformToResume(),
+      userId: {
+        firstName: user?.firstName,
+        lastName: user.lastName,
+        emailId: user.emailId,
+      },
+    };
+  };
+
+  const toDateValue = (value) => {
+    if (!value) return null;
+
+    // If already Date object
+    if (value instanceof Date) {
+      return parseDate(value.toISOString().split("T")[0]);
+    }
+
+    // If string
+    if (typeof value === "string") {
+      return parseDate(value.split("T")[0]);
+    }
+
+    return null;
+  };
+
+  const convertToISO = (date) => {
+    if (!date) return null;
+
+    const month = String(date.month).padStart(2, "0");
+    const day = String(date.day).padStart(2, "0");
+
+    return `${date.year}-${month}-${day}`; // ✅ NO timezone issues
   };
 
   const hasStartedTyping =
@@ -242,6 +279,78 @@ const ResumeForm = () => {
     skills ||
     certifications ||
     languages;
+
+  const clearFormState = () => {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith("rf_"))
+      .forEach((k) => localStorage.removeItem(k));
+
+    setTitle("");
+    setDescription("");
+    setPhone("");
+    setGithub("");
+    setLinkedin("");
+    setPortfolio("");
+    setAddress("");
+    setSkills("");
+    setCertifications("");
+    setLanguages("");
+    setEducation([
+      {
+        institute: "",
+        degree: "",
+        fieldOfStudy: "",
+        startDate: "",
+        endDate: "",
+        grade: "",
+        place: "",
+      },
+    ]);
+    setProjects([
+      {
+        title: "",
+        description: "",
+        techStack: "",
+        githubLink: "",
+        demoLink: "",
+      },
+    ]);
+    setExperience([
+      {
+        company: "",
+        role: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        location: "",
+      },
+    ]);
+
+    setShowProjects(false);
+    setShowExperience(false);
+  };
+
+  const handleClear = () => {
+    if (!window.confirm("Clear all form data?")) return;
+    clearFormState();
+  };
+
+  const handleSaveResume = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        BASE_URL + "/resumes",
+        transformToResume(),
+        { withCredentials: true },
+      );
+      dispatch(addResume(response.data?.populatedResume));
+      toast.success("Resume saved successfully!");
+      clearFormState();
+    } catch (err) {
+      toast.error("Something went wrong!");
+      console.log(err);
+    }
+  };
 
   return (
     <>
@@ -271,7 +380,7 @@ const ResumeForm = () => {
           )}
 
           <Card className="w-full shadow-none border-none space-y-4">
-            <Form>
+            <Form onSubmit={handleSaveResume}>
               <Fieldset>
                 <Fieldset.Legend className="text-2xl font-semibold">
                   Create your resume
@@ -281,6 +390,7 @@ const ResumeForm = () => {
                   <TextField name="name">
                     <Label>Title</Label>
                     <Input
+                      value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="Sofware Developer"
                     />
@@ -289,6 +399,7 @@ const ResumeForm = () => {
                   <TextField isRequired name="description" type="text">
                     <Label>Description</Label>
                     <TextArea
+                      value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="About yourself.."
                     ></TextArea>
@@ -302,6 +413,7 @@ const ResumeForm = () => {
                   <TextField isRequired name="phone" type="number">
                     <Label>Phone</Label>
                     <Input
+                      value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="123456789"
                     ></Input>
@@ -309,11 +421,13 @@ const ResumeForm = () => {
                   </TextField>
                   <TextField isRequired className="w-full" name="website">
                     <Label>Github</Label>
-                    <InputGroup onChange={(e) => setGithub(e.target.value)}>
+                    <InputGroup>
                       <InputGroup.Prefix>
                         <LogoGithub className="size-4 text-muted" />
                       </InputGroup.Prefix>
                       <InputGroup.Input
+                        value={github}
+                        onChange={(e) => setGithub(e.target.value)}
                         aria-label="Github URL"
                         className="w-full"
                       />
@@ -321,11 +435,13 @@ const ResumeForm = () => {
                   </TextField>
                   <TextField isRequired className="w-full" name="website">
                     <Label>Linkedin</Label>
-                    <InputGroup onChange={(e) => setLinkedin(e.target.value)}>
+                    <InputGroup>
                       <InputGroup.Prefix>
                         <LogoLinkedin className="size-4 text-muted" />
                       </InputGroup.Prefix>
                       <InputGroup.Input
+                        value={linkedin}
+                        onChange={(e) => setLinkedin(e.target.value)}
                         aria-label="Linkedin URL"
                         className="w-full"
                       />
@@ -333,11 +449,13 @@ const ResumeForm = () => {
                   </TextField>
                   <TextField isRequired className="w-full" name="website">
                     <Label>Portfolio</Label>
-                    <InputGroup onChange={(e) => setPortfolio(e.target.value)}>
+                    <InputGroup>
                       <InputGroup.Prefix>
                         <Globe className="size-4 text-muted" />
                       </InputGroup.Prefix>
                       <InputGroup.Input
+                        value={portfolio}
+                        onChange={(e) => setPortfolio(e.target.value)}
                         aria-label="Portfolio URL"
                         className="w-full"
                       />
@@ -346,6 +464,7 @@ const ResumeForm = () => {
                   <TextField isRequired name="address" type="text">
                     <Label>Address</Label>
                     <TextArea
+                      value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="Bangalore, India"
                     ></TextArea>
@@ -414,8 +533,13 @@ const ResumeForm = () => {
                             isRequired
                             className="w-50 mt-3"
                             name="date"
+                            value={toDateValue(edu.startDate)}
                             onChange={(date) =>
-                              handleEducationChange(index, "startDate", date)
+                              handleEducationChange(
+                                index,
+                                "startDate",
+                                convertToISO(date),
+                              )
                             }
                           >
                             <Label>Start Date</Label>
@@ -467,8 +591,13 @@ const ResumeForm = () => {
                             isRequired
                             className="w-50 mt-3"
                             name="date"
+                            value={toDateValue(edu.endDate)}
                             onChange={(date) =>
-                              handleEducationChange(index, "endDate", date)
+                              handleEducationChange(
+                                index,
+                                "endDate",
+                                convertToISO(date),
+                              )
                             }
                           >
                             <Label>End Date</Label>
@@ -521,6 +650,7 @@ const ResumeForm = () => {
                         <TextField className="mt-3" isRequired>
                           <Label>Grade</Label>
                           <Input
+                            value={edu.grade}
                             onChange={(e) =>
                               handleEducationChange(
                                 index,
@@ -535,6 +665,7 @@ const ResumeForm = () => {
                         <TextField className="mt-3" isRequired>
                           <Label>Place</Label>
                           <Input
+                            value={edu.place}
                             onChange={(e) =>
                               handleEducationChange(
                                 index,
@@ -623,11 +754,12 @@ const ResumeForm = () => {
                                     isRequired
                                     className="w-50 mt-3"
                                     name="date"
+                                    value={toDateValue(proj.startDate)}
                                     onChange={(date) =>
                                       handleProjectChange(
                                         index,
                                         "startDate",
-                                        date,
+                                        convertToISO(date),
                                       )
                                     }
                                   >
@@ -686,11 +818,12 @@ const ResumeForm = () => {
                                     isRequired
                                     className="w-50 mt-3"
                                     name="date"
+                                    value={toDateValue(proj.endDate)}
                                     onChange={(date) =>
                                       handleProjectChange(
                                         index,
                                         "endDate",
-                                        date,
+                                        convertToISO(date),
                                       )
                                     }
                                   >
@@ -918,11 +1051,12 @@ const ResumeForm = () => {
                                     isRequired
                                     className="w-50 mt-3"
                                     name="date"
+                                    value={toDateValue(exp.startDate)}
                                     onChange={(date) =>
                                       handleExperienceChange(
                                         index,
                                         "startDate",
-                                        date,
+                                        convertToISO(date),
                                       )
                                     }
                                   >
@@ -978,14 +1112,14 @@ const ResumeForm = () => {
                                     </DatePicker.Popover>
                                   </DatePicker>
                                   <DatePicker
-                                    isRequired
                                     className="w-50 mt-3"
                                     name="date"
+                                    value={toDateValue(exp.endDate)}
                                     onChange={(date) =>
                                       handleExperienceChange(
                                         index,
                                         "endDate",
-                                        date,
+                                        convertToISO(date),
                                       )
                                     }
                                   >
@@ -1059,36 +1193,6 @@ const ResumeForm = () => {
                                   />
                                 </TextField>
 
-                                <TextField isRequired>
-                                  <Label className="mt-3">Tech Stack</Label>
-                                  <TextArea
-                                    value={exp.techStack}
-                                    onChange={(e) =>
-                                      handleExperienceChange(
-                                        index,
-                                        "techStack",
-                                        e.target.value,
-                                      )
-                                    }
-                                    className="mt-3"
-                                  />
-                                </TextField>
-
-                                {/* <TextField isRequired>
-                                  <Label className="mt-3">Place</Label>
-                                  <Input
-                                    value={exp.location}
-                                    onChange={(e) =>
-                                      handleExperienceChange(
-                                        index,
-                                        "location",
-                                        e.target.value,
-                                      )
-                                    }
-                                    className="mt-3"
-                                  />
-                                </TextField> */}
-
                                 {index === experience.length - 1 && (
                                   <div className="flex justify-end mt-4 gap-3">
                                     <Button
@@ -1149,6 +1253,13 @@ const ResumeForm = () => {
                     <FloppyDisk />
                     Save changes
                   </Button>
+                  <Button
+                    type="button"
+                    onClick={handleClear}
+                    variant="danger-soft"
+                  >
+                    <Eraser /> Clear form
+                  </Button>
                 </Fieldset.Actions>
               </Fieldset>
             </Form>
@@ -1165,7 +1276,10 @@ const ResumeForm = () => {
               className="flex-1 flex justify-center items-start pt-2"
             >
               <div className="w-full max-w-187.5 bg-white shadow-xl rounded-xl overflow-hidden">
-                <ResumeLayout resume={transformToResume()} mode="preview" />
+                <ResumeLayout
+                  resume={transformToResumePreview()}
+                  mode="preview"
+                />
               </div>
             </motion.div>
           )}
