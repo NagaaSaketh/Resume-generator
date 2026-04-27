@@ -25,12 +25,12 @@ const Menu = () => {
               <Drawer.CloseTrigger />
               <Drawer.Body>
                 <nav className="flex flex-col gap-1 mt-3">
-                  <Link to="/" className="flex items-center gap-2 m-3">
+                  <Link to="/app" className="flex items-center gap-2 m-3">
                     <House style={{ width: 18, height: 18 }} />{" "}
                     <span>Home</span>
                   </Link>
                   
-                  <Link to="/resumes" className="flex items-center gap-2 m-3">
+                  <Link to="/app/resumes" className="flex items-center gap-2 m-3">
                     <File style={{ width: 18, height: 18 }} />{" "}
                     <span>My Resumes</span>
                   </Link>

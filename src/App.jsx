@@ -10,6 +10,7 @@ import Body from "./components/Body";
 import ResumeForm from "./components/ResumeForm";
 import SavedResumes from "./components/SavedResumes";
 import Resume from "./components/Resume";
+import HomePage from "./pages/HomePage";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -17,8 +18,9 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<HomePage/>}/>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Body />}>
+        <Route path="/app" element={<Body />}>
           <Route index element={<ResumeForm />} />
           <Route path="resumes" element={<SavedResumes />} />
           <Route path="resumes/:id" element={<Resume/>}/>

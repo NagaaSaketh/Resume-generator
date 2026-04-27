@@ -7,6 +7,7 @@ import {
   Plus,
   TrashBin,
   Eraser,
+  CircleInfo,
 } from "@gravity-ui/icons";
 import {
   Card,
@@ -24,6 +25,7 @@ import {
   Calendar,
   DateField,
   DatePicker,
+  Modal,
 } from "@heroui/react";
 import ResumeLayout from "./ResumeLayout";
 import { motion, AnimatePresence } from "framer-motion";
@@ -45,6 +47,7 @@ const fadeSlide = {
 const ResumeForm = () => {
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
+  const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = usePersistedState("rf_title", "");
   const [description, setDescription] = usePersistedState("rf_description", "");
   const [phone, setPhone] = usePersistedState("rf_phone", "");
@@ -265,7 +268,7 @@ const ResumeForm = () => {
     const month = String(date.month).padStart(2, "0");
     const day = String(date.day).padStart(2, "0");
 
-    return `${date.year}-${month}-${day}`; // ✅ NO timezone issues
+    return `${date.year}-${month}-${day}`;
   };
 
   const hasStartedTyping =
@@ -331,8 +334,8 @@ const ResumeForm = () => {
   };
 
   const handleClear = () => {
-    if (!window.confirm("Clear all form data?")) return;
     clearFormState();
+    setIsOpen(false);
   };
 
   const handleSaveResume = async (e) => {
@@ -401,7 +404,8 @@ const ResumeForm = () => {
                     <TextArea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder="About yourself.."
+                      placeholder="Brief summary of your skills, experience, and goals"
+                      className="w-full min-h-35"
                     ></TextArea>
                     <FieldError />
                   </TextField>
@@ -885,6 +889,7 @@ const ResumeForm = () => {
                                     Project Description
                                   </Label>
                                   <TextArea
+                                    placeholder="Press Enter to add each point as a bullet"
                                     value={proj.description}
                                     onChange={(e) =>
                                       handleProjectChange(
@@ -893,7 +898,7 @@ const ResumeForm = () => {
                                         e.target.value,
                                       )
                                     }
-                                    className="mt-3"
+                                    className="mt-3 w-full min-h-35"
                                   />
                                 </TextField>
 
@@ -1181,6 +1186,7 @@ const ResumeForm = () => {
                                     Role Description
                                   </Label>
                                   <TextArea
+                                    placeholder="Press Enter to add each point as a bullet"
                                     value={exp.description}
                                     onChange={(e) =>
                                       handleExperienceChange(
@@ -1189,7 +1195,7 @@ const ResumeForm = () => {
                                         e.target.value,
                                       )
                                     }
-                                    className="mt-3"
+                                    className="mt-3 w-full min-h-35"
                                   />
                                 </TextField>
 
@@ -1226,6 +1232,7 @@ const ResumeForm = () => {
                       <TextArea
                         value={skills}
                         onChange={(e) => setSkills(e.target.value)}
+                        className="w-full min-h-35"
                       ></TextArea>
                     </TextField>
                   </div>
@@ -1253,13 +1260,44 @@ const ResumeForm = () => {
                     <FloppyDisk />
                     Save changes
                   </Button>
-                  <Button
-                    type="button"
-                    onClick={handleClear}
-                    variant="danger-soft"
-                  >
-                    <Eraser /> Clear form
-                  </Button>
+                  <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
+                    <Button variant="danger" onClick={() => setIsOpen(true)}>
+                      <Eraser />
+                      Clear Form
+                    </Button>
+
+                    <Modal.Backdrop isDismissable={false}>
+                      <Modal.Container>
+                        <Modal.Dialog className="sm:max-w-90">
+                          <Modal.CloseTrigger />
+
+                          <Modal.Header>
+                            <Modal.Icon>
+                              <CircleInfo className="size-5" />
+                            </Modal.Icon>
+                            <Modal.Heading>Clear resume data</Modal.Heading>
+                            <p className="text-sm text-muted">
+                              This action cannot be undone
+                            </p>
+                          </Modal.Header>
+
+                          <Modal.Body>
+                            <p>Are you sure you want to clear data?</p>
+                          </Modal.Body>
+
+                          <Modal.Footer>
+                            <Button variant="secondary" slot="close">
+                              Cancel
+                            </Button>
+
+                            <Button variant="danger" onClick={handleClear}>
+                              Clear
+                            </Button>
+                          </Modal.Footer>
+                        </Modal.Dialog>
+                      </Modal.Container>
+                    </Modal.Backdrop>
+                  </Modal>
                 </Fieldset.Actions>
               </Fieldset>
             </Form>

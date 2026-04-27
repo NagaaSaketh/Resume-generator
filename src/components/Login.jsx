@@ -43,7 +43,7 @@ const Login = () => {
 
       dispatch(addUser(response.data));
       toast.success("Login successfull");
-      navigate("/");
+      navigate("/app");
     } catch (err) {
       console.error(err);
       toast.error("Invalid credentials");
@@ -73,7 +73,7 @@ const Login = () => {
 
       dispatch(addUser(response.data));
       toast.success("Account created successfully!");
-      navigate("/");
+      navigate("/app");
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong");
@@ -91,12 +91,12 @@ const Login = () => {
       transition={{ duration: 0.4 }}
     >
       <div className="text-center mb-2">
-        <h1 className="text-5xl font-bold bg-linear-to-r from-blue-600 to-red-500 bg-clip-text text-transparent">
+        <h1 className="text-4xl sm:text-5xl font-bold bg-linear-to-r from-blue-600 to-red-500 bg-clip-text text-transparent mb-2">
           Resume Generator
         </h1>
-        <p className="text-gray-500 mt-3 text-lg max-w-lg">
+        {/* <p className="text-gray-500 mt-3 text-lg max-w-lg">
           Build professional resumes effortlessly with AI-powered suggestions.
-        </p>
+        </p> */}
       </div>
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
@@ -104,16 +104,16 @@ const Login = () => {
         transition={{ duration: 0.4, ease: easeOut }}
       >
         <Card
-          className={`w-full ${isLogin ? "max-w-md" : "max-w-xl"} rounded-2xl shadow-xl`}
+          className={`w-full ${isLogin ? "max-w-md" : "max-w-xl"} className="shadow-xl hover:shadow-2xl transition duration-300"`}
         >
           <Card.Header className="px-8 pt-8 pb-2">
-            <Card.Title className="text-xl font-bold">
-              {isLogin ? "Login" : "Create Account"}
+            <Card.Title className="text-center text-xl font-bold">
+              {isLogin ? "Welcome Back" : "Create Account"}
             </Card.Title>
-            <Card.Description>
+            <Card.Description className="text-center">
               {isLogin
-                ? "Enter your credentials to access your account"
-                : "Sign up to start building your resume"}
+                ? "Continue building your AI-powered resume"
+                : "Start building your AI-powered resume in minutes"}
             </Card.Description>
           </Card.Header>
           <motion.div
@@ -201,7 +201,7 @@ const Login = () => {
 
                 <Link
                   onClick={() => setIsLogin(!isLogin)}
-                  className="underline"
+                  className="underline font-medium hover:text-blue-600 transition"
                 >
                   {isLogin
                     ? "Don’t have an account? Sign up"

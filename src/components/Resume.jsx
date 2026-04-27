@@ -37,7 +37,7 @@ const Resume = () => {
       });
       setResume(null);
       toast.success("Resume deleted!");
-      navigate("/resumes")
+      navigate("/app/resumes")
     } catch (err) {
       console.log(err);
       toast.error("Something went wrong!");

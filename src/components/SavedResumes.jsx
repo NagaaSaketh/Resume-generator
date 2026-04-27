@@ -3,8 +3,7 @@ import Menu from "./Menu";
 import { Card, Button } from "@heroui/react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { resume } from "react-dom/server";
-import { div } from "framer-motion/client";
+import ResumeLayout from "./ResumeLayout";
 const SavedResumes = () => {
   const resumes = useSelector((store) => store.resume);
   console.log(resumes);
@@ -17,10 +16,8 @@ const SavedResumes = () => {
         </h1>
 
         {resumes.length === 0 && (
-          <Link to="/">
-            <Button variant="primary">
-              Create Resume
-            </Button>
+          <Link to="/app">
+            <Button variant="primary">Create Resume</Button>
           </Link>
         )}
       </div>
@@ -28,24 +25,22 @@ const SavedResumes = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
         {Array.isArray(resumes) &&
           resumes.map((resume) => (
-            <Link key={resume._id} to={`/resumes/${resume._id}`}>
-              <Card className="relative h-62.5 sm:h-75 md:h-87.5 translate-y-2 hover:translate-y-1 transition duration-300">
-                <img
-                  alt="NEO Home Robot"
-                  aria-hidden="true"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  src="https://placehold.co/400?text=Resume"
-                />
-                <Card.Footer className="z-10 mt-auto flex items-end justify-between">
+            <Link key={resume._id} to={`/app/resumes/${resume._id}`}>
+              <Card className="relative h-62.5 sm:h-75 md:h-87.5 overflow-hidden cursor-pointer hover:scale-105 transition">
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="scale-[0.3] origin-top-left w-250 pointer-events-none">
+                    <ResumeLayout resume={resume} mode="preview" />
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-black/20 z-10" />
+                <Card.Footer className="z-20 mt-auto flex items-end justify-between">
                   <div>
-                    <div className="text-base font-medium text-black sm:text-lg">
+                    <div className="text-base font-medium text-white sm:text-lg">
                       {resume.title}
                     </div>
-                    <div className="text-xs font-medium text-black/50 sm:text-sm">
-                      <p>
-                        Created on{" "}
-                        {new Date(resume.createdAt).toLocaleDateString()}
-                      </p>
+                    <div className="text-xs text-white/70 sm:text-sm">
+                      Created on{" "}
+                      {new Date(resume.createdAt).toLocaleDateString()}
                     </div>
                   </div>
                 </Card.Footer>
