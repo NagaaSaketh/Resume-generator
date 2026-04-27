@@ -8,6 +8,7 @@ import {
   TrashBin,
   Eraser,
   CircleInfo,
+  SparklesFill,
 } from "@gravity-ui/icons";
 import {
   Card,
@@ -26,6 +27,7 @@ import {
   DateField,
   DatePicker,
   Modal,
+  Spinner,
 } from "@heroui/react";
 import ResumeLayout from "./ResumeLayout";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,6 +50,7 @@ const ResumeForm = () => {
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
+  const [isImproving, setIsImproving] = useState(false);
   const [title, setTitle] = usePersistedState("rf_title", "");
   const [description, setDescription] = usePersistedState("rf_description", "");
   const [phone, setPhone] = usePersistedState("rf_phone", "");
@@ -355,6 +358,24 @@ const ResumeForm = () => {
     }
   };
 
+  const handleImproveDescriptionUsingAI = async (desc) => {
+    try {
+      setIsImproving(true);
+      const response = await axios.post(
+        BASE_URL + "/improve-description",
+        { description: desc },
+        { withCredentials: true },
+      );
+      setDescription((prev) => response.data.description);
+      toast.success("Improved description");
+    } catch (err) {
+      console.log(err.message);
+      toast.error("Failed to improve description");
+    } finally {
+      setIsImproving(false);
+    }
+  };
+
   return (
     <>
       <motion.div
@@ -385,10 +406,21 @@ const ResumeForm = () => {
           <Card className="w-full shadow-none border-none space-y-4">
             <Form onSubmit={handleSaveResume}>
               <Fieldset>
-                <Fieldset.Legend className="text-2xl font-semibold">
-                  Create your resume
-                </Fieldset.Legend>
-                <Description>Fill in your details.</Description>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Fieldset.Legend className="text-2xl font-semibold">
+                      Create your resume
+                    </Fieldset.Legend>
+                    <Description>Fill in your details.</Description>
+                  </div>
+
+                  <div>
+                    <Button type="button" size="sm" variant="tertiary">
+                      <SparklesFill /> Improve Entire Resume
+                    </Button>
+                  </div>
+                </div>
+
                 <FieldGroup>
                   <TextField name="name">
                     <Label>Title</Label>
@@ -399,16 +431,48 @@ const ResumeForm = () => {
                     />
                     <FieldError />
                   </TextField>
-                  <TextField isRequired name="description" type="text">
-                    <Label>Description</Label>
+
+                  <TextField name="description" type="text">
+                    <div className="flex items-center justify-between">
+                      <Label isRequired>Description</Label>
+                      {description && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                        >
+                          <Button
+                            onClick={() =>
+                              handleImproveDescriptionUsingAI(description)
+                            }
+                            type="button"
+                            size="sm"
+                            variant="tertiary"
+                          >
+                            {isImproving ? (
+                              <>
+                                <Spinner size="sm" />{" "}
+                                <span className="text-muted">Improving..</span>
+                              </>
+                            ) : (
+                              <>
+                                <SparklesFill /> Improve
+                              </>
+                            )}
+                          </Button>
+                        </motion.div>
+                      )}
+                    </div>
+
                     <TextArea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Brief summary of your skills, experience, and goals"
                       className="w-full min-h-35"
                     ></TextArea>
+
                     <FieldError />
                   </TextField>
+
                   <div className="mt-8 pt-6 border-t border-gray-200 space-y-4">
                     <Label className="text-md font-semibold">
                       Personal Info

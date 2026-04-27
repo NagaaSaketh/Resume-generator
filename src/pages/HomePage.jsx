@@ -15,9 +15,19 @@ const HomePage = () => {
     }
   }, [user]);
 
+  const features = [
+    {
+      title: "AI-Powered Writing",
+      desc: "Improve your project and experience descriptions instantly with AI suggestions.",
+    },
+    {
+      title: "Real-Time Preview",
+      desc: "See your resume update live as you build and edit.",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center">
-      {/* ================= HERO ================= */}
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex flex-col items-center">
       <section className="flex flex-col items-center justify-center text-center px-6 py-20 max-w-4xl">
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
@@ -56,18 +66,8 @@ const HomePage = () => {
         </motion.div>
       </section>
 
-      {/* ================= FEATURES ================= */}
       <section className="grid gap-6 px-6 pb-20 max-w-5xl w-full mx-auto grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
-        {[
-          {
-            title: "AI-Powered Writing",
-            desc: "Improve your project and experience descriptions instantly with AI suggestions.",
-          },
-          {
-            title: "Real-Time Preview",
-            desc: "See your resume update live as you build and edit.",
-          },
-        ].map((feature, index) => (
+        {features.map((feature, index) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, y: 40 }}
