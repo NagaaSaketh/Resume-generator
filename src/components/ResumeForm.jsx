@@ -376,6 +376,52 @@ const ResumeForm = () => {
     }
   };
 
+  const handleImproveProjectsDescriptionUsingAI = async (
+    index,
+    description,
+  ) => {
+    try {
+      setIsImproving(true);
+      const response = await axios.post(
+        BASE_URL + "/improve-project",
+        { description: description },
+        { withCredentials: true },
+      );
+      const updatedProjects = [...projects];
+      updatedProjects[index].description = response.data.description.join("\n");
+      setProjects(updatedProjects);
+      toast.success("Improved projects description");
+    } catch (err) {
+      console.log(err.message);
+      toast.error("Failed to improve projects description");
+    } finally {
+      setIsImproving(false);
+    }
+  };
+
+  const handleImproveExperienceDescriptionUsingAI = async (
+    index,
+    description,
+  ) => {
+    try {
+      setIsImproving(true);
+      const response = await axios.post(
+        BASE_URL + "/improve-experience",
+        { description: description },
+        { withCredentials: true },
+      );
+      const updatedExperiences = [...experience];
+      updatedExperiences[index].description = response.data.description.join("\n");
+      setExperience(updatedExperiences);
+      toast.success("Improved experience description");
+    } catch (err) {
+      console.log(err.message);
+      toast.error("Failed to improve experience description");
+    } finally {
+      setIsImproving(false);
+    }
+  };
+
   return (
     <>
       <motion.div
@@ -414,11 +460,11 @@ const ResumeForm = () => {
                     <Description>Fill in your details.</Description>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <Button type="button" size="sm" variant="tertiary">
                       <SparklesFill /> Improve Entire Resume
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
 
                 <FieldGroup>
@@ -948,10 +994,45 @@ const ResumeForm = () => {
                                   </DatePicker>
                                 </div>
 
-                                <TextField isRequired>
-                                  <Label className="mt-3">
-                                    Project Description
-                                  </Label>
+                                <TextField>
+                                  <div className="flex items-center justify-between mt-2">
+                                    <Label isRequired className="mt-3">
+                                      Project Description
+                                    </Label>
+                                    {proj.description && (
+                                      <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                      >
+                                        <Button
+                                          onClick={() =>
+                                            handleImproveProjectsDescriptionUsingAI(
+                                              index,
+                                              proj.description,
+                                            )
+                                          }
+                                          type="button"
+                                          size="sm"
+                                          variant="tertiary"
+                                          className="mt-2"
+                                        >
+                                          {isImproving ? (
+                                            <>
+                                              <Spinner size="sm" />{" "}
+                                              <span className="text-muted">
+                                                Improving..
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <SparklesFill /> Improve
+                                            </>
+                                          )}
+                                        </Button>
+                                      </motion.div>
+                                    )}
+                                  </div>
+
                                   <TextArea
                                     placeholder="Press Enter to add each point as a bullet"
                                     value={proj.description}
@@ -1246,9 +1327,44 @@ const ResumeForm = () => {
                                 </div>
 
                                 <TextField isRequired>
-                                  <Label className="mt-3">
-                                    Role Description
-                                  </Label>
+                                  <div className="flex items-center justify-between mt-2">
+                                    <Label isRequired className="mt-3">
+                                      Role Description
+                                    </Label>
+                                    {exp.description && (
+                                      <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                      >
+                                        <Button
+                                          onClick={() =>
+                                            handleImproveExperienceDescriptionUsingAI(
+                                              index,
+                                              exp.description,
+                                            )
+                                          }
+                                          type="button"
+                                          size="sm"
+                                          variant="tertiary"
+                                          className="mt-2"
+                                        >
+                                          {isImproving ? (
+                                            <>
+                                              <Spinner size="sm" />{" "}
+                                              <span className="text-muted">
+                                                Improving..
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <SparklesFill /> Improve
+                                            </>
+                                          )}
+                                        </Button>
+                                      </motion.div>
+                                    )}
+                                  </div>
+
                                   <TextArea
                                     placeholder="Press Enter to add each point as a bullet"
                                     value={exp.description}
